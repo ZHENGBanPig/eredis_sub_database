@@ -8,7 +8,7 @@
 %% Specified in http://www.erlang.org/doc/man/gen_server.html#call-3
 -define(TIMEOUT, 5000).
 
--export([start_link/0, start_link/1, start_link/3, start_link/7, stop/1,
+-export([start_link/0, start_link/1, start_link/3, start_link/6, start_link/7, stop/1,
          controlling_process/1, controlling_process/2, controlling_process/3,
          ack_message/1, subscribe/2, unsubscribe/2, channels/1]).
 
