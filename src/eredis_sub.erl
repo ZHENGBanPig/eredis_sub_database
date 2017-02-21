@@ -42,6 +42,21 @@ start_link(Host, Port, Database, Password, ReconnectSleep,
                                  MaxQueueSize, QueueBehaviour).
 
 
+start_link(Host, Port, Password, ReconnectSleep,
+           MaxQueueSize, QueueBehaviour)
+  when is_list(Host) andalso
+       is_integer(Port) andalso
+
+       is_list(Password) andalso
+       (is_integer(ReconnectSleep) orelse ReconnectSleep =:= no_reconnect) andalso
+       (is_integer(MaxQueueSize) orelse MaxQueueSize =:= infinity) andalso
+       (QueueBehaviour =:= drop orelse QueueBehaviour =:= exit) ->
+
+    eredis_sub_client:start_link(Host, Port,  Password, ReconnectSleep,
+                                 MaxQueueSize, QueueBehaviour).
+
+
+
 %% @doc: Callback for starting from poolboy
 -spec start_link(server_args()) -> {ok, Pid::pid()} | {error, Reason::term()}.
 start_link(Args) ->
