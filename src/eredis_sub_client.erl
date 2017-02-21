@@ -36,6 +36,7 @@ start_link(Host, Port, Database, Password, ReconnectSleep, MaxQueueSize, QueueBe
     Args = [Host, Port, Database, Password, ReconnectSleep, MaxQueueSize, QueueBehaviour],
     gen_server:start_link(?MODULE, Args, []).
 
+<<<<<<< .mine
 -spec start_link(Host::list(),
                  Port::integer(),
                  Password::string(),
@@ -44,7 +45,25 @@ start_link(Host, Port, Database, Password, ReconnectSleep, MaxQueueSize, QueueBe
                  QueueBehaviour::drop | exit) ->
                         {ok, Pid::pid()} | {error, Reason::term()}.
 start_link(Host, Port, Password, ReconnectSleep, MaxQueueSize, QueueBehaviour) ->
+=======
+-spec start_link(Host::list(),
+                 Port::integer(),
+                 Password::string(),
+                 ReconnectSleep::reconnect_sleep(),
+                 MaxQueueSize::integer() | infinity,
+                 QueueBehaviour::drop | exit) ->
+                        {ok, Pid::pid()} | {error, Reason::term()}.
+
+>>>>>>> .theirs
     Args = [Host, Port, 1, Password, ReconnectSleep, MaxQueueSize, QueueBehaviour],
+<<<<<<< .mine
+    gen_server:start_link(?MODULE, Args, []).
+=======
+
+>>>>>>> .theirs
+
+start_link(Host, Port, 1, Password, ReconnectSleep, MaxQueueSize, QueueBehaviour) ->
+    Args = [Host, Port, Password, ReconnectSleep, MaxQueueSize, QueueBehaviour],
     gen_server:start_link(?MODULE, Args, []).
 
 stop(Pid) ->
