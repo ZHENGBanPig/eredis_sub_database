@@ -14,7 +14,7 @@
 
 
 %% API
--export([start_link/7, stop/1]).
+-export([start_link/7, start_link/6, stop/1]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -36,6 +36,17 @@ start_link(Host, Port, Database, Password, ReconnectSleep, MaxQueueSize, QueueBe
     Args = [Host, Port, Database, Password, ReconnectSleep, MaxQueueSize, QueueBehaviour],
     gen_server:start_link(?MODULE, Args, []).
 
+-spec start_link(Host::list(),
+                 Port::integer(),
+                 Password::string(),
+                 ReconnectSleep::reconnect_sleep(),
+                 MaxQueueSize::integer() | infinity,
+                 QueueBehaviour::drop | exit) ->
+                        {ok, Pid::pid()} | {error, Reason::term()}.
+
+start_link(Host, Port, 1, Password, ReconnectSleep, MaxQueueSize, QueueBehaviour) ->
+    Args = [Host, Port, Password, ReconnectSleep, MaxQueueSize, QueueBehaviour],
+    gen_server:start_link(?MODULE, Args, []).
 
 stop(Pid) ->
     gen_server:call(Pid, stop).
