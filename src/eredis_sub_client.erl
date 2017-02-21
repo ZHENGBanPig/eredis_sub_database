@@ -14,7 +14,7 @@
 
 
 %% API
--export([start_link/6, stop/1]).
+-export([start_link/7, stop/1]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -26,13 +26,14 @@
 
 -spec start_link(Host::list(),
                  Port::integer(),
+                 Database::integer(),
                  Password::string(),
                  ReconnectSleep::reconnect_sleep(),
                  MaxQueueSize::integer() | infinity,
                  QueueBehaviour::drop | exit) ->
                         {ok, Pid::pid()} | {error, Reason::term()}.
-start_link(Host, Port, Password, ReconnectSleep, MaxQueueSize, QueueBehaviour) ->
-    Args = [Host, Port, Password, ReconnectSleep, MaxQueueSize, QueueBehaviour],
+start_link(Host, Port, Database, Password, ReconnectSleep, MaxQueueSize, QueueBehaviour) ->
+    Args = [Host, Port, Database, Password, ReconnectSleep, MaxQueueSize, QueueBehaviour],
     gen_server:start_link(?MODULE, Args, []).
 
 
@@ -43,9 +44,10 @@ stop(Pid) ->
 %% gen_server callbacks
 %%====================================================================
 
-init([Host, Port, Password, ReconnectSleep, MaxQueueSize, QueueBehaviour]) ->
+init([Host, Port, Database, Password, ReconnectSleep, MaxQueueSize, QueueBehaviour]) ->
     State = #state{host            = Host,
                    port            = Port,
+                   database        = Database,
                    password        = list_to_binary(Password),
                    reconnect_sleep = ReconnectSleep,
                    channels        = [],
@@ -312,12 +314,19 @@ queue_or_send(Msg, State) ->
 connect(State) ->
     case gen_tcp:connect(State#state.host, State#state.port, ?SOCKET_OPTS) of
         {ok, Socket} ->
+
             case authenticate(Socket, State#state.password) of
                 ok ->
-                    {ok, State#state{socket = Socket}};
+                    case select_database(Socket, State#state.database) of
+                        ok ->
+                            {ok, State#state{socket = Socket}};
+                        {error, Reason} ->
+                            {error, {select_error, Reason}}
+                    end;
                 {error, Reason} ->
                     {error, {authentication_error, Reason}}
             end;
+
         {error, Reason} ->
             {error, {connection_error, Reason}}
     end.
@@ -356,3 +365,11 @@ send_to_controller(_Msg, #state{controlling_process=undefined}) ->
 send_to_controller(Msg, #state{controlling_process={_Ref, Pid}}) ->
     %%error_logger:info_msg("~p ! ~p~n", [Pid, Msg]),
     Pid ! Msg.
+
+select_database(_Socket, undefined) ->
+    ok;
+select_database(_Socket, <<"0">>) ->
+    ok;
+select_database(Socket, Database) ->
+    eredis_client:do_sync_command(Socket, ["SELECT", " ", Database, "\r\n"]).
+
