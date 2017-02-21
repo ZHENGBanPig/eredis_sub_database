@@ -381,5 +381,12 @@ select_database(_Socket, undefined) ->
 select_database(_Socket, <<"0">>) ->
     ok;
 select_database(Socket, Database) ->
-    eredis_client:do_sync_command(Socket, ["SELECT", " ", Database, "\r\n"]).
 
+    eredis_client:do_sync_command(Socket, ["SELECT", " ", read_database(Database), "\r\n"]).
+
+read_database(undefined) ->
+    undefined;
+read_database(Database) when is_binary(Database) ->
+    Database.
+read_database(Database) when is_integer(Database) ->
+    list_to_binary(integer_to_list(Database)).

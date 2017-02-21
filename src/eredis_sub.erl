@@ -32,7 +32,7 @@ start_link(Host, Port, Database, Password, ReconnectSleep,
            MaxQueueSize, QueueBehaviour)
   when is_list(Host) andalso
        is_integer(Port) andalso
-       is_integer(Database) andalso
+       is_binary(Database) andalso
        is_list(Password) andalso
        (is_integer(ReconnectSleep) orelse ReconnectSleep =:= no_reconnect) andalso
        (is_integer(MaxQueueSize) orelse MaxQueueSize =:= infinity) andalso
